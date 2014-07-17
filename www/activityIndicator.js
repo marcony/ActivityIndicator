@@ -11,6 +11,9 @@ var ActivityIndicator = {
    	},
     openBt: function(fnSuccess, fnError, name){
         cordova.exec(fnSuccess, fnError, "ActivityIndicator", "open", [name]);
+    },
+    print: function(fnSuccess, fnError, str){
+        cordova.exec(fnSuccess, fnError, "ActivityIndicator", "print", [str]);
     }
 };
 

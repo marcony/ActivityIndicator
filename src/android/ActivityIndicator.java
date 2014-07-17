@@ -64,6 +64,15 @@ public class ActivityIndicator extends CordovaPlugin {
 				callbackContext.error("Bluetooth Device Not Found: " + name);
 			}
 			return true;
+		}else if (action.equals("print")) {
+			try {
+				String msg = args.getString(0);
+				sendData(callbackContext, msg);
+			} catch (IOException e) {
+				Log.e(LOG_TAG, e.getMessage());
+				e.printStackTrace();
+			}
+			return true;
 		}
 
 		return false;
@@ -229,7 +238,23 @@ public class ActivityIndicator extends CordovaPlugin {
 		}
 	}
 
-
+	boolean sendData(CallbackContext callbackContext, String msg) throws IOException {
+		try {
+			// the text typed by the user
+//			msg += "\n";
+			mmOutputStream.write(msg.getBytes());
+			// tell the user data were sent
+//			Log.d(LOG_TAG, "Data Sent");
+			callbackContext.success("Data Sent");
+			return true;
+		} catch (Exception e) {
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
+			e.printStackTrace();
+			callbackContext.error(errMsg);
+		}
+		return false;
+	}
 
 
 
