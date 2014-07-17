@@ -14,7 +14,10 @@ var ActivityIndicator = {
     },
     printBt: function(fnSuccess, fnError, str){
         cordova.exec(fnSuccess, fnError, "ActivityIndicator", "print", [str]);
-    }
+    },
+    closeBt: function(fnSuccess, fnError){
+      cordova.exec(fnSuccess, fnError, "ActivityIndicator", "close", []);
+   },
 };
 
 module.exports = ActivityIndicator;

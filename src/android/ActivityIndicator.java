@@ -73,6 +73,14 @@ public class ActivityIndicator extends CordovaPlugin {
 				e.printStackTrace();
 			}
 			return true;
+		}else if (action.equals("close")) {
+			try {
+				closeBT(callbackContext);
+			} catch (IOException e) {
+				Log.e(LOG_TAG, e.getMessage());
+				e.printStackTrace();
+			}
+			return true;
 		}
 
 		return false;
@@ -255,7 +263,24 @@ public class ActivityIndicator extends CordovaPlugin {
 		}
 		return false;
 	}
-
+	// fecha a conexão com a impressora conectada
+	boolean closeBT(CallbackContext callbackContext) throws IOException {
+		try {
+			stopWorker = true;
+			mmOutputStream.close();
+			mmInputStream.close();
+			mmSocket.close();
+//			myLabel.setText("Bluetooth Closed");
+			callbackContext.success("Bluetooth Closed");
+			return true;
+		} catch (Exception e) {
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
+			e.printStackTrace();
+			callbackContext.error(errMsg);
+		}
+		return false;
+	}
 
 
 
