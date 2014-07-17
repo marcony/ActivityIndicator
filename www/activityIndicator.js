@@ -5,7 +5,10 @@ var ActivityIndicator = {
     },
     hide: function () {
         cordova.exec(null, null, "ActivityIndicator", "hide", []);
-    }
+    },
+    list: function(fnSuccess, fnError){
+      	cordova.exec(fnSuccess, fnError, "ActivityIndicator", "list", []);
+   	}
 };
 
 module.exports = ActivityIndicator;
