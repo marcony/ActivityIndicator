@@ -9,7 +9,7 @@ var ActivityIndicator = {
     list: function(fnSuccess, fnError){
       	cordova.exec(fnSuccess, fnError, "ActivityIndicator", "list", []);
    	},
-    open: function(fnSuccess, fnError, name){
+    openBt: function(fnSuccess, fnError, name){
       exec(fnSuccess, fnError, "ActivityIndicator", "open", [name]);
     }
 };
