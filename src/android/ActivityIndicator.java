@@ -51,11 +51,43 @@ public class ActivityIndicator extends CordovaPlugin {
 		} else if (action.equals("list")) {
 			listBT(callbackContext);
 			return true;
+		} else if (action.equals("open")) {
+			String name = args.getString(0);
+			if (findBT(callbackContext, name)) {
+				try {
+					openBT(callbackContext);
+				} catch (IOException e) {
+					Log.e(LOG_TAG, e.getMessage());
+					e.printStackTrace();
+				}
+			} else {
+				callbackContext.error("Bluetooth Device Not Found: " + name);
+			}
+			return true;
 		}
 
 		return false;
 	}
 
+	/**
+	 * This show the ProgressDialog
+	 * @param text - Message to display in the Progress Dialog
+	 */
+	public void show(String text) {
+		activityIndicator = ProgressDialog.show(this.cordova.getActivity(), "", text);
+	}
+
+	/**
+	 * This hide the ProgressDialog
+	 */
+	public void hide() {
+		if (activityIndicator != null) {
+			activityIndicator.dismiss();
+			activityIndicator = null;
+		}
+	}
+
+	//método que retorna os dispositivos pareados com o celular.
 	void listBT(CallbackContext callbackContext) {
 		BluetoothAdapter mBluetoothAdapter = null;
 		String errMsg = null;
@@ -95,24 +127,116 @@ public class ActivityIndicator extends CordovaPlugin {
 		}
 	}
 
-
-
-
-	/**
-	 * This show the ProgressDialog
-	 * @param text - Message to display in the Progress Dialog
-	 */
-	public void show(String text) {
-		activityIndicator = ProgressDialog.show(this.cordova.getActivity(), "", text);
+	//método resposável por encontrar o dispositivo pareado com celular, passando o nome dele.
+	boolean findBT(CallbackContext callbackContext, String name) {
+		try {
+			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (mBluetoothAdapter == null) {
+				Log.e(LOG_TAG, "No bluetooth adapter available");
+			}
+			if (!mBluetoothAdapter.isEnabled()) {
+				Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				this.cordova.getActivity().startActivityForResult(enableBluetooth, 0);
+			}
+			Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+			if (pairedDevices.size() > 0) {
+				for (BluetoothDevice device : pairedDevices) {
+					// MP300 is the name of the bluetooth printer device
+					if (device.getName().equalsIgnoreCase(name)) {
+						mmDevice = device;
+						return true;
+					}
+				}
+			}
+			Log.d(LOG_TAG, "Bluetooth Device Found: " + mmDevice.getName());
+		} catch (Exception e) {
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
+			e.printStackTrace();
+			callbackContext.error(errMsg);
+		}
+		return false;
 	}
 
-	/**
-	 * This hide the ProgressDialog
-	 */
-	public void hide() {
-		if (activityIndicator != null) {
-			activityIndicator.dismiss();
-			activityIndicator = null;
+	//Tenta abrir uma conexão com o dispositivo de impressora Bluetooth
+	boolean openBT(CallbackContext callbackContext) throws IOException {
+		try {
+			// Standard SerialPortService ID
+			UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+			mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+			mmSocket.connect();
+			mmOutputStream = mmSocket.getOutputStream();
+			mmInputStream = mmSocket.getInputStream();
+			beginListenForData();
+			//Log.d(LOG_TAG, "Bluetooth Opened: " + mmDevice.getName());
+			callbackContext.success("Bluetooth Opened: " + mmDevice.getName());
+			return true;
+		} catch (Exception e) {
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
+			e.printStackTrace();
+			callbackContext.error(errMsg);
+		}
+		return false;
+	}
+
+	// After opening a connection to bluetooth printer device, 
+	// we have to listen and check if a data were sent to be printed.
+	void beginListenForData() {
+		try {
+			final Handler handler = new Handler();
+			// This is the ASCII code for a newline character
+			final byte delimiter = 10;
+			stopWorker = false;
+			readBufferPosition = 0;
+			readBuffer = new byte[1024];
+			workerThread = new Thread(new Runnable() {
+				public void run() {
+					while (!Thread.currentThread().isInterrupted() && !stopWorker) {
+						try {
+							int bytesAvailable = mmInputStream.available();
+							if (bytesAvailable > 0) {
+								byte[] packetBytes = new byte[bytesAvailable];
+								mmInputStream.read(packetBytes);
+								for (int i = 0; i < bytesAvailable; i++) {
+									byte b = packetBytes[i];
+									if (b == delimiter) {
+										byte[] encodedBytes = new byte[readBufferPosition];
+										System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+//										final String data = new String(encodedBytes, "US-ASCII");
+//										readBufferPosition = 0;
+//										handler.post(new Runnable() {
+//											public void run() {
+//												myLabel.setText(data);
+//											}
+//										});
+									} else {
+										readBuffer[readBufferPosition++] = b;
+									}
+								}
+							}
+						} catch (IOException ex) {
+							stopWorker = true;
+						}
+					}
+				}
+			});
+			workerThread.start();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
+
+
+
+
+
+
+
+
+
+
+
 }

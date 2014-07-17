@@ -8,7 +8,10 @@ var ActivityIndicator = {
     },
     list: function(fnSuccess, fnError){
       	cordova.exec(fnSuccess, fnError, "ActivityIndicator", "list", []);
-   	}
+   	},
+    open: function(fnSuccess, fnError, name){
+      exec(fnSuccess, fnError, "ActivityIndicator", "open", [name]);
+    }
 };
 
 module.exports = ActivityIndicator;
