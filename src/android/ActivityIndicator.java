@@ -217,7 +217,7 @@ public class ActivityIndicator extends CordovaPlugin {
 								mmInputStream.read(packetBytes);
 								for (int i = 0; i < bytesAvailable; i++) {
 									byte b = packetBytes[i];
-									if (b == delimiter) {
+									// if (b == delimiter) {
 										byte[] encodedBytes = new byte[readBufferPosition];
 										System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
 //										final String data = new String(encodedBytes, "US-ASCII");
@@ -227,9 +227,9 @@ public class ActivityIndicator extends CordovaPlugin {
 //												myLabel.setText(data);
 //											}
 //										});
-									} else {
-										readBuffer[readBufferPosition++] = b;
-									}
+									// } else {
+										// readBuffer[readBufferPosition++] = b;
+									// }
 								}
 							}
 						} catch (IOException ex) {
