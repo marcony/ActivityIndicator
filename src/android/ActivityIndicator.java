@@ -249,7 +249,7 @@ public class ActivityIndicator extends CordovaPlugin {
 	boolean sendData(CallbackContext callbackContext, String msg) throws IOException {
 		try {
 			// the text typed by the user
-//			msg += "\n";
+			msg += "\n";
 			mmOutputStream.write(msg.getBytes());
 			// tell the user data were sent
 //			Log.d(LOG_TAG, "Data Sent");
