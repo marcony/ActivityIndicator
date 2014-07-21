@@ -203,7 +203,7 @@ public class ActivityIndicator extends CordovaPlugin {
 		try {
 			final Handler handler = new Handler();
 			// This is the ASCII code for a newline character
-			final byte delimiter = 10;
+			final byte delimiter = 2;
 			stopWorker = false;
 			readBufferPosition = 0;
 			readBuffer = new byte[1024];
@@ -217,7 +217,7 @@ public class ActivityIndicator extends CordovaPlugin {
 								mmInputStream.read(packetBytes);
 								for (int i = 0; i < bytesAvailable; i++) {
 									byte b = packetBytes[i];
-									// if (b == delimiter) {
+									if (b == delimiter) {
 										byte[] encodedBytes = new byte[readBufferPosition];
 										System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
 //										final String data = new String(encodedBytes, "US-ASCII");
@@ -227,9 +227,9 @@ public class ActivityIndicator extends CordovaPlugin {
 //												myLabel.setText(data);
 //											}
 //										});
-									// } else {
-										// readBuffer[readBufferPosition++] = b;
-									// }
+									} else {
+										readBuffer[readBufferPosition++] = b;
+									}
 								}
 							}
 						} catch (IOException ex) {
